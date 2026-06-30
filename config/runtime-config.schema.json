@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "runtime-config.schema.json",
+  "title": "Runtime Configuration",
+  "description": "Optional runtime config. Every field has a hardcoded default; a missing file or absent section falls back to defaults. Location: {configDir}/runtime-config.json.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string", "description": "Path to this schema for editor tooling." },
+    "_meta": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Audit metadata. Updated by the admin UI on write.",
+      "properties": {
+        "version": { "const": 1, "description": "Schema version. Must equal 1; a non-1 file is rejected and defaults are used." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "ISO timestamp of the last write." },
+        "updatedBy": { "type": "string", "description": "Principal that last wrote the config." }
+      }
+    },
+    "resilience": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Client network resilience (circuit breaker, retry, adaptive throttle).",
+      "properties": {
+        "circuitThreshold": { "type": "integer", "minimum": 1, "maximum": 1000, "description": "Consecutive failures before the circuit opens. Default 5." },
+        "circuitCooldownMs": { "type": "integer", "minimum": 0, "maximum": 86400000, "description": "How long the circuit stays open before half-open probe (ms). Default 60000." },
+        "retryBaseDelayMs": { "type": "integer", "minimum": 0, "maximum": 86400000, "description": "Base exponential-backoff delay (ms). Default 1000." },
+        "retryMaxDelayMs": { "type": "integer", "minimum": 0, "maximum": 86400000, "description": "Cap on backoff delay (ms). Default 30000." },
+        "retryJitterMaxMs": { "type": "integer", "minimum": 0, "maximum": 86400000, "description": "Max random jitter added to each retry (ms). Default 500." },
+        "maxRetryAfterMs": { "type": "integer", "minimum": 0, "maximum": 86400000, "description": "Cap honored from a server Retry-After header (ms). Default 30000." },
+        "throttleWindowSize": { "type": "integer", "minimum": 1, "maximum": 10000, "description": "Rolling window of recent requests for adaptive throttle. Default 20." },
+        "throttleBaselineCount": { "type": "integer", "minimum": 1, "maximum": 10000, "description": "Baseline request count used to compute throttle factors. Default 10." },
+        "throttleEnterFactor": { "type": "number", "exclusiveMinimum": 1.0, "maximum": 100, "description": "Load factor at which throttling engages. Must exceed throttleExitFactor. Default 2.0." },
+        "throttleExitFactor": { "type": "number", "exclusiveMinimum": 1.0, "maximum": 100, "description": "Load factor at which throttling disengages. Must be < throttleEnterFactor. Default 1.5." },
+        "throttleDelayMs": { "type": "integer", "minimum": 0, "maximum": 86400000, "description": "Delay injected per request while throttled (ms). Default 2000." }
+      }
+    },
+    "rateLimiting": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Server request rate-limiter windows.",
+      "properties": {
+        "windowMs": { "type": "integer", "minimum": 0, "maximum": 86400000, "description": "Sliding rate-limit window (ms). Default 60000." },
+        "cleanupCutoffMs": { "type": "integer", "minimum": 0, "maximum": 86400000, "description": "Idle age after which a limiter bucket is evicted (ms). Default 120000." }
+      }
+    },
+    "sessions": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Anonymous session store configuration.",
+      "properties": {
+        "anonymousTtlMs": { "type": "integer", "minimum": 0, "maximum": 86400000, "description": "Anonymous session lifetime (ms). Default 14400000 (4h)." },
+        "anonymousMaxSessions": { "type": "integer", "minimum": 1, "maximum": 1000000, "description": "Max concurrent anonymous sessions. Default 100." },
+        "anonymousMaxSizeBytes": { "type": "integer", "minimum": 0, "maximum": 1073741824, "description": "Max bytes stored per anonymous session. Default 10485760 (10 MB)." }
+      }
+    },
+    "flightRecorder": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Flight recorder dump throttling and retention.",
+      "properties": {
+        "minDumpIntervalMs": { "type": "integer", "minimum": 0, "maximum": 86400000, "description": "Minimum spacing between auto-dumps (ms). Default 10000." },
+        "maxDumpsPerWindow": { "type": "integer", "minimum": 1, "maximum": 1000, "description": "Max dumps per window. Default 5." },
+        "dumpWindowMs": { "type": "integer", "minimum": 0, "maximum": 86400000, "description": "Dump rate-limit window (ms). Default 60000." },
+        "maxRetainedDumps": { "type": "integer", "minimum": 1, "maximum": 10000, "description": "Max dump pairs retained on disk. Default 20." },
+        "maxTotalDumpSizeBytes": { "type": "integer", "minimum": 0, "maximum": 1073741824, "description": "Total dump-storage cap (bytes). Default 52428800 (50 MB)." }
+      }
+    },
+    "server": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Server infrastructure timeouts and limits.",
+      "properties": {
+        "defaultOperationTimeoutMs": { "type": "integer", "minimum": 0, "maximum": 3600000, "description": "Default operation timeout (ms, max 1h). Default 120000 (2 min)." },
+        "longOperationTimeoutMs": { "type": "integer", "minimum": 0, "maximum": 3600000, "description": "Long operation timeout (ms, max 1h). Default 600000 (10 min)." },
+        "subprocessBufferLimitBytes": { "type": "integer", "minimum": 0, "maximum": 1073741824, "description": "Max subprocess stdout buffer (bytes). Default 10485760 (10 MB)." },
+        "apiKeyMaskLength": { "type": "integer", "minimum": 0, "maximum": 64, "description": "Visible characters when masking an API key in logs/UI. Default 4." }
+      }
+    },
+    "cache": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Generic cache defaults.",
+      "properties": {
+        "defaultTtlMs": { "type": "integer", "minimum": 0, "maximum": 86400000, "description": "Default cache TTL (ms). Default 30000." }
+      }
+    }
+  }
+}
