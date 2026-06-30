@@ -1,0 +1,47 @@
+{
+  "backends": [
+    { "id": "gemini", "label": "Google Gemini" },
+    { "id": "claude", "label": "Anthropic Claude" },
+    { "id": "groq", "label": "Groq" },
+    { "id": "openai", "label": "OpenAI" },
+    { "id": "azure", "label": "Azure OpenAI" },
+    { "id": "ollama", "label": "Ollama (Local)" },
+    { "id": "deepseek", "label": "DeepSeek" }
+  ],
+  "models": [
+    { "id": "gemini-2.0-flash-lite", "apiModelId": "gemini-2.0-flash-lite", "label": "Gemini 2.0 Flash Lite", "backend": "gemini" },
+    { "id": "gemini-2.5-flash", "apiModelId": "gemini-2.5-flash-preview-05-20", "label": "Gemini 2.5 Flash", "backend": "gemini" },
+    { "id": "claude-sonnet-4", "apiModelId": "claude-sonnet-4-20250514", "label": "Claude Sonnet 4", "backend": "claude" },
+    { "id": "groq-llama-3.3-70b", "apiModelId": "llama-3.3-70b-versatile", "label": "Llama 3.3 70B (Groq)", "backend": "groq" }
+  ],
+  "fallbackChains": {
+    "gemini": ["gemini-2.5-flash", "gemini-2.0-flash-lite"],
+    "claude": ["claude-sonnet-4"]
+  },
+  "defaults": {
+    "fast": "gemini-2.0-flash-lite",
+    "balanced": "gemini-2.5-flash",
+    "frontier": "claude-sonnet-4"
+  },
+  "contextWindows": {
+    "gemini-2.0-flash-lite": 1048576,
+    "gemini-2.5-flash": 1048576,
+    "claude-sonnet-4": 200000
+  },
+  "taskTiers": {
+    "basic": {
+      "gemini": "gemini-2.0-flash-lite",
+      "groq": "llama-3.3-70b-versatile"
+    },
+    "advanced": {
+      "gemini": "gemini-2.5-flash-preview-05-20",
+      "claude": "claude-sonnet-4-20250514"
+    }
+  },
+  "capabilityDefaults": {
+    "gemini": { "supportsTools": true, "supportsVision": true, "supportsStreaming": true },
+    "claude": { "supportsTools": true, "supportsVision": true, "supportsStreaming": true },
+    "groq": { "supportsTools": false, "supportsVision": false, "supportsStreaming": true },
+    "ollama": { "supportsTools": false, "supportsVision": false, "supportsStreaming": true }
+  }
+}
